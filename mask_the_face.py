@@ -122,9 +122,13 @@ if is_directory:
     for f in tqdm(files):
         image_path = path + "/" + f
 
-        write_path = path + "_masked"
+        write_path = "/content/drive/MyDrive/datasets/Facemask Inpainting/multi-person/masked"
+        write_path2 = "/content/drive/MyDrive/datasets/Facemask Inpainting/multi-person/binary"
         if not os.path.isdir(write_path):
             os.makedirs(write_path)
+
+        if not os.path.isdir(write_path2):
+            os.makedirs(write_path2)
 
         if is_image(image_path):
             # Proceed if file is image
@@ -136,6 +140,13 @@ if is_directory:
             masked_image, mask, mask_binary_array, original_image = mask_image(
                 image_path, args
             )
+
+            binary = sum(mask_binary_array)
+            try:
+                binary[binary!=0] = 255.0
+            except:
+                continue
+            
             for i in range(len(mask)):
                 w_path = (
                     write_path
@@ -146,8 +157,20 @@ if is_directory:
                     + "."
                     + split_path[1]
                 )
+
+                w_path_masked = (
+                    write_path2
+                    + "/"
+                    + split_path[0]
+                    + "_"
+                    + mask[i]
+                    + "."
+                    + split_path[1]
+                )
+
                 img = masked_image[i]
                 cv2.imwrite(w_path, img)
+                cv2.imwrite(w_path_masked, binary)
 
     print_orderly("Masking image directories", 60)
 
